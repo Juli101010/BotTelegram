@@ -101,7 +101,7 @@ def actualizar_nuevos_seguidores(canal_id: int):
 def obtener_resumen_estadisticas(chat_id: int):
     with sqlite3.connect('telegram_bot.db') as conn:
         cursor = conn.cursor()
-        cursor.execute("SELECT nombre_canal, enlace, nuevos_seguidores FROM enlaces JOIN canales ON enlaces.canal_id = canales.id WHERE enlaces.usuario_id = ? AND DATE(fecha_creacion) = DATE('now')", (chat_id,))
+        cursor.execute("SELECT nombre_canal, enlace, clicks_recibidos, nuevos_seguidores FROM enlaces JOIN canales ON enlaces.canal_id = canales.id WHERE enlaces.usuario_id = ?", (chat_id,))
         resumen = cursor.fetchall()
     return resumen
 
@@ -109,10 +109,8 @@ def obtener_resumen_estadisticas(chat_id: int):
 def enviar_reporte_diario(chat_id):
     resumen = obtener_resumen_estadisticas(chat_id)
     mensaje = "Resumen diario de estadísticas:\n\n"
-    mensaje += "{:<20} {:<50} {:<20}\n".format("Canal", "Nombre del Enlace", "Nuevos Seguidores")
-    mensaje += "-" * 90 + "\n"
-    for canal, enlace, seguidores in resumen:
-        mensaje += "{:<20} {:<50} {:<20}\n".format(canal, enlace.split('/')[-1], seguidores)
+    for canal, enlace, clicks, seguidores in resumen:
+        mensaje += f"Canal: {canal}\nEnlace: {enlace}\nClics recibidos: {clicks}\nNuevos seguidores: {seguidores}\n\n"
     bot.send_message(chat_id, mensaje)
 
 # Función para registrar un usuario
